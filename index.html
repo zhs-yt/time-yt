@@ -117,13 +117,13 @@
 <div class="card">
   <h2>⏱️ 时间加速器 <span>差值 · 4s→-1s</span></h2>
   <div class="subhead">
-    输入一个<strong>目标时间</strong>，先减去<strong>当前系统时间</strong>得到差值，
-    再对差值执行 <code>每4秒提前1秒</code>，最后输出调整后的时间。
+    输入一个<strong>当前成熟时间</strong>，先减去<strong>当前系统时间</strong>得到差值，
+    再对差值执行 <code>每4秒提前1秒</code>，最后输出浇水成熟时间。
   </div>
 
-  <!-- 输入目标时间 -->
+  <!-- 输入当前成熟时间 -->
   <div class="input-group">
-    <label for="inputTime">目标时间</label>
+    <label for="inputTime">当前成熟时间</label>
     <div class="input-wrapper">
       <input type="text" id="inputTime" placeholder="例如 18:00:00" value="18:00:00" autocomplete="off" spellcheck="false">
     </div>
@@ -140,7 +140,7 @@
 
   <!-- 输出结果 -->
   <div class="output-group">
-    <label>调整后的时间</label>
+    <label>浇水成熟时间</label>
     <div class="output-box" id="outputBox">
       <div class="result" id="outputTime">--:--:--</div>
       <div class="badge" id="deltaBadge">等待计算</div>
@@ -154,7 +154,7 @@
     <button class="btn btn-primary" id="calcBtn">⚡ 计算</button>
   </div>
   <div class="footnote">
-    <kbd>目标时间 - 当前时间 = 差值</kbd> → 差值每4秒扣1秒
+    <kbd>当前成熟时间 - 当前时间 = 差值</kbd> → 差值每4秒扣1秒
   </div>
 </div>
 
