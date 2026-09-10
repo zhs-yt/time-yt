@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>时间加速器 · 差值每4秒提前1秒</title>
+  <style>
+    * { box-sizing: border-box; font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif; }
+    body {
+      margin: 0; min-height: 100vh;
+      background: linear-gradient(145deg, #1a1f2e 0%, #2d3349 100%);
+      display: flex; justify-content: center; align-items: center; padding: 16px;
+    }
+    .card {
+      background: rgba(18, 22, 33, 0.85); backdrop-filter: blur(8px);
+      border-radius: 32px; box-shadow: 0 20px 40px rgba(0,0,0,0.6), 0 0 0 1px rgba(255,255,255,0.05);
+      padding: 32px 28px; width: 100%; max-width: 480px;
+    }
+    h2 {
+      margin-top: 0; margin-bottom: 8px; font-weight: 500; font-size: 1.8rem;
+      color: #eef3ff; letter-spacing: -0.5px; display: flex; align-items: center; gap: 10px;
+    }
+    h2 span {
+      background: #3e4a6b; font-size: 1rem; font-weight: 400;
+      padding: 4px 10px; border-radius: 40px; color: #b9c8ff;
+    }
+    .subhead {
+      color: #8f9bb5; font-size: 0.95rem; margin-bottom: 28px;
+      border-left: 3px solid #4f6ef7; padding-left: 14px;
+      background: rgba(79,110,247,0.08); border-radius: 0 8px 8px 0; line-height: 1.5;
+    }
+    .subhead code {
+      background: #252c41; padding: 2px 8px; border-radius: 40px;
+      font-size: 0.9rem; color: #c0d0ff; font-family: 'JetBrains Mono', monospace;
+    }
+    .input-group { margin-bottom: 24px; }
+    .input-group label {
+      display: block; font-size: 0.85rem; text-transform: uppercase;
+      letter-spacing: 0.5px; color: #98a6c9; margin-bottom: 8px; font-weight: 500;
+    }
+    .input-wrapper {
+      display: flex; align-items: center; background: #0b0f18;
+      border-radius: 18px; border: 1px solid #2c3447; transition: border 0.2s, box-shadow 0.2s;
+    }
+    .input-wrapper:focus-within { border-color: #4f6ef7; box-shadow: 0 0 0 3px rgba(79,110,247,0.25); }
+    .input-wrapper input {
+      background: transparent; border: none; outline: none;
+      padding: 16px 18px; font-size: 1.2rem; font-weight: 500; color: #f0f4ff;
+      width: 100%; border-radius: 18px; font-family: 'JetBrains Mono', monospace; letter-spacing: 0.5px;
+    }
+    .input-wrapper input::placeholder { color: #4f5a74; font-weight: 400; font-family: system-ui, sans-serif; font-size: 1rem; }
+    .hint { font-size: 0.8rem; color: #6b7897; margin-top: 6px; padding-left: 8px; display: flex; align-items: center; gap: 6px; }
+    .hint i { font-style: normal; background: #2c3447; padding: 2px 8px; border-radius: 20px; color: #a5b3dc; }
+    .output-group { margin-top: 28px; margin-bottom: 8px; }
+    .output-group label {
+      display: block; font-size: 0.85rem; text-transform: uppercase;
+      letter-spacing: 0.5px; color: #98a6c9; margin-bottom: 8px; font-weight: 500;
+    }
+    .output-box {
+      background: #0b0f18; border-radius: 20px; border: 1px solid #2c3447;
+      padding: 18px 22px; display: flex; align-items: center; justify-content: space-between;
+      min-height: 82px; word-break: break-word;
+    }
+    .output-box .result {
+      font-size: 1.8rem; font-weight: 600; color: #eef3ff;
+      font-family: 'JetBrains Mono', monospace; letter-spacing: 1px; line-height: 1.3;
+    }
+    .output-box .badge {
+      background: #1e2639; color: #9db0f0; border-radius: 60px;
+      padding: 6px 14px; font-size: 0.8rem; font-weight: 500;
+      white-space: nowrap; border: 1px solid #34405e; margin-left: 12px;
+    }
+    .meta-info {
+      margin-top: 10px; font-size: 0.78rem; color: #6b7897;
+      display: flex; flex-direction: column; gap: 4px; padding-left: 4px;
+    }
+    .meta-info span { color: #a5b3dc; font-family: 'JetBrains Mono', monospace; }
+    .error-msg {
+      color: #ff8a8a; background: rgba(255,70,70,0.12);
+      border-radius: 40px; padding: 6px 16px; font-size: 0.9rem; display: inline-block; margin-top: 8px;
+    }
+    .action-buttons { display: flex; gap: 12px; margin-top: 28px; }
+    .btn {
+      flex: 1; background: #2c3447; border: none; border-radius: 40px;
+      padding: 16px 20px; font-size: 1rem; font-weight: 600; color: #d0dbfa;
+      cursor: pointer; transition: all 0.15s ease; display: flex;
+      align-items: center; justify-content: center; gap: 8px;
+      border: 1px solid #3b455e; letter-spacing: 0.3px;
+    }
+    .btn:hover { background: #36405a; border-color: #5b6b93; color: #ffffff; }
+    .btn:active { transform: scale(0.97); }
+    .btn-primary { background: #4f6ef7; border-color: #6b86ff; color: white; }
+    .btn-primary:hover { background: #6380ff; border-color: #8ca0ff; }
+    .btn-primary:active { background: #3e5ae0; }
+    .time-presets { display: flex; gap: 8px; margin-top: 10px; flex-wrap: wrap; }
+    .preset-btn {
+      background: #1b2232; border: 1px solid #2f3a4f; border-radius: 40px;
+      padding: 8px 16px; font-size: 0.8rem; color: #a6b6df;
+      cursor: pointer; transition: all 0.1s; font-family: 'JetBrains Mono', monospace;
+    }
+    .preset-btn:hover { background: #28324a; border-color: #4f6ef7; color: #d9e2ff; }
+    .footnote {
+      margin-top: 22px; text-align: center; font-size: 0.75rem;
+      color: #515e7a; border-top: 1px solid #202838; padding-top: 18px;
+    }
+    .footnote kbd {
+      background: #1e2639; padding: 2px 8px; border-radius: 20px;
+      color: #90a3da; font-size: 0.7rem; border: 1px solid #303c56;
+    }
+  </style>
+
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="theme-color" content="#4f6ef7">
+
+</head>
+<body>
+<div class="card">
+  <h2>⏱️ 时间加速器 <span>差值 · 4s→-1s</span></h2>
+  <div class="subhead">
+    输入一个<strong>目标时间</strong>，先减去<strong>当前系统时间</strong>得到差值，
+    再对差值执行 <code>每4秒提前1秒</code>，最后输出调整后的时间。
+  </div>
+
+  <!-- 输入目标时间 -->
+  <div class="input-group">
+    <label for="inputTime">目标时间</label>
+    <div class="input-wrapper">
+      <input type="text" id="inputTime" placeholder="例如 18:00:00" value="18:00:00" autocomplete="off" spellcheck="false">
+    </div>
+    <div class="hint">
+      <i>格式</i> HH:MM:SS 或 HH:MM
+    </div>
+    <div class="time-presets">
+      <button class="preset-btn" data-preset="00:00:00">00:00:00</button>
+      <button class="preset-btn" data-preset="12:00:00">12:00:00</button>
+      <button class="preset-btn" data-preset="18:00:00">18:00:00</button>
+      <button class="preset-btn" data-preset="23:59:59">23:59:59</button>
+    </div>
+  </div>
+
+  <!-- 输出结果 -->
+  <div class="output-group">
+    <label>调整后的时间</label>
+    <div class="output-box" id="outputBox">
+      <div class="result" id="outputTime">--:--:--</div>
+      <div class="badge" id="deltaBadge">等待计算</div>
+    </div>
+    <div class="meta-info" id="metaInfo"></div>
+    <div id="errorContainer" style="min-height: 28px;"></div>
+  </div>
+
+  <div class="action-buttons">
+    <button class="btn" id="resetBtn">↺ 重置</button>
+    <button class="btn btn-primary" id="calcBtn">⚡ 计算</button>
+  </div>
+  <div class="footnote">
+    <kbd>目标时间 - 当前时间 = 差值</kbd> → 差值每4秒扣1秒
+  </div>
+</div>
+
+<script>
+  (function() {
+    const inputTime = document.getElementById('inputTime');
+    const outputTime = document.getElementById('outputTime');
+    const deltaBadge = document.getElementById('deltaBadge');
+    const metaInfo = document.getElementById('metaInfo');
+    const errorContainer = document.getElementById('errorContainer');
+    const calcBtn = document.getElementById('calcBtn');
+    const resetBtn = document.getElementById('resetBtn');
+    const presetBtns = document.querySelectorAll('.preset-btn');
+
+    const SECONDS_PER_DAY = 86400;
+
+    // 解析 HH:MM[:SS] -> 总秒数
+    function parseTimeToSeconds(timeStr) {
+      if (!timeStr || typeof timeStr !== 'string') return null;
+      const cleaned = timeStr.trim().replace(/：/g, ':');
+      const parts = cleaned.split(':');
+      if (parts.length < 2 || parts.length > 3) return null;
+
+      const hours = Number(parts[0]);
+      const minutes = Number(parts[1]);
+      let seconds = 0;
+      if (parts.length === 3) seconds = Number(parts[2]);
+
+      if (!Number.isInteger(hours) || hours < 0 || hours > 23) return null;
+      if (!Number.isInteger(minutes) || minutes < 0 || minutes > 59) return null;
+      if (!Number.isInteger(seconds) || seconds < 0 || seconds > 59) return null;
+
+      return hours * 3600 + minutes * 60 + seconds;
+    }
+
+    // 总秒数 -> HH:MM:SS (24小时循环)
+    function formatSecondsToTime(totalSeconds) {
+      let normalized = ((Math.round(totalSeconds) % SECONDS_PER_DAY) + SECONDS_PER_DAY) % SECONDS_PER_DAY;
+      const h = Math.floor(normalized / 3600);
+      const m = Math.floor((normalized % 3600) / 60);
+      const s = normalized % 60;
+      return `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+    }
+
+    // 获取当前系统时间的秒数
+    function getCurrentSeconds() {
+      const now = new Date();
+      return now.getHours() * 3600 + now.getMinutes() * 60 + now.getSeconds();
+    }
+
+    // 核心计算
+    function computeResult(targetSeconds) {
+      const currentSeconds = getCurrentSeconds();
+
+      // 差值 (可能为负，表示目标时间已过)
+      let diff = targetSeconds - currentSeconds;
+
+      // 对差值执行"每4秒扣1秒"
+      // 处理负数：使用 Math.trunc 向零取整，保证对称性
+      const deduct = Math.trunc(diff / 4);  // 每满4秒扣1秒
+      const adjustedDiff = diff - deduct;
+
+      // 调整后的目标时间 = 当前时间 + 调整后的差值
+      const resultSeconds = currentSeconds + adjustedDiff;
+
+      return { diff, deduct, adjustedDiff, resultSeconds, currentSeconds };
+    }
+
+    function updateOutput(timeStr, showError = true) {
+      errorContainer.innerHTML = '';
+      metaInfo.innerHTML = '';
+
+      if (!timeStr || timeStr.trim() === '') {
+        outputTime.textContent = '--:--:--';
+        deltaBadge.textContent = '等待输入';
+        return;
+      }
+
+      const targetSeconds = parseTimeToSeconds(timeStr);
+      if (targetSeconds === null) {
+        outputTime.textContent = '无效时间';
+        deltaBadge.textContent = '格式错误';
+        if (showError) {
+          errorContainer.innerHTML = '<span class="error-msg">⚠️ 请输入有效时间，如 18:00:00 或 23:59</span>';
+        }
+        return;
+      }
+
+      const { diff, deduct, adjustedDiff, resultSeconds, currentSeconds } = computeResult(targetSeconds);
+
+      outputTime.textContent = formatSecondsToTime(resultSeconds);
+
+      // 徽章显示扣减了多久
+      if (deduct > 0) {
+        deltaBadge.textContent = `提前 ${deduct} 秒`;
+      } else if (deduct < 0) {
+        deltaBadge.textContent = `延后 ${Math.abs(deduct)} 秒`;
+      } else {
+        deltaBadge.textContent = '差值不足4秒';
+      }
+
+      // 显示详细过程
+      metaInfo.innerHTML = `
+        <div>当前时间：<span>${formatSecondsToTime(currentSeconds)}</span></div>
+        <div>原始差值：<span>${diff} 秒</span> → 扣减后：<span>${adjustedDiff} 秒</span>（每4秒扣1秒，共扣 ${deduct} 秒）</div>
+      `;
+    }
+
+    // 事件绑定
+    calcBtn.addEventListener('click', () => updateOutput(inputTime.value.trim(), true));
+
+    resetBtn.addEventListener('click', () => {
+      inputTime.value = '18:00:00';
+      updateOutput('18:00:00', false);
+    });
+
+    presetBtns.forEach(btn => {
+      btn.addEventListener('click', function() {
+        inputTime.value = this.getAttribute('data-preset');
+        updateOutput(inputTime.value, true);
+      });
+    });
+
+    inputTime.addEventListener('keydown', e => {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        calcBtn.click();
+      }
+    });
+
+    // 实时预览（不显示错误）
+    inputTime.addEventListener('input', function() {
+      const raw = this.value.trim();
+      if (raw === '') {
+        outputTime.textContent = '--:--:--';
+        deltaBadge.textContent = '等待输入';
+        metaInfo.innerHTML = '';
+        errorContainer.innerHTML = '';
+        return;
+      }
+      const sec = parseTimeToSeconds(raw);
+      if (sec !== null) {
+        const { deduct, resultSeconds, currentSeconds, diff, adjustedDiff } = computeResult(sec);
+        outputTime.textContent = formatSecondsToTime(resultSeconds);
+        if (deduct > 0) deltaBadge.textContent = `提前 ${deduct} 秒`;
+        else if (deduct < 0) deltaBadge.textContent = `延后 ${Math.abs(deduct)} 秒`;
+        else deltaBadge.textContent = '差值不足4秒';
+        metaInfo.innerHTML = `
+          <div>当前时间：<span>${formatSecondsToTime(currentSeconds)}</span></div>
+          <div>原始差值：<span>${diff} 秒</span> → 扣减后：<span>${adjustedDiff} 秒</span>（共扣 ${deduct} 秒）</div>
+        `;
+        errorContainer.innerHTML = '';
+      } else {
+        outputTime.textContent = '···';
+        deltaBadge.textContent = '待完善';
+        metaInfo.innerHTML = '';
+        errorContainer.innerHTML = '';
+      }
+    });
+
+    // 初始化
+    updateOutput('18:00:00', false);
+  })();
+</script>
+
+<script>
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('./sw.js')
+      .then(() => console.log('Service Worker 注册成功'))
+      .catch((err) => console.log('注册失败:', err));
+  }
+
+</script>
+</body>
+</html>
