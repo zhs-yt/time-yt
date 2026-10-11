@@ -206,22 +206,17 @@
     }
 
     // 核心计算
-    function computeResult(targetSeconds) {
-      const currentSeconds = getCurrentSeconds();
+    // 核心计算：对成熟时间本身每4秒提前1秒
+function computeResult(targetSeconds) {
+  const currentSeconds = getCurrentSeconds();
 
-      // 差值 (可能为负，表示目标时间已过)
-      let diff = targetSeconds - currentSeconds;
+  // 不再和目标时间做差，直接对成熟时间扣减
+  // 每满4秒，成熟时间提前1秒
+  const deduct = Math.trunc(targetSeconds / 4);  // 每4秒提前1秒
+  const resultSeconds = targetSeconds - deduct;
 
-      // 对差值执行"每4秒扣1秒"
-      // 处理负数：使用 Math.trunc 向零取整，保证对称性
-      const deduct = Math.trunc(diff / 4);  // 每满4秒扣1秒
-      const adjustedDiff = diff - deduct;
-
-      // 调整后的目标时间 = 当前时间 + 调整后的差值
-      const resultSeconds = currentSeconds + adjustedDiff;
-
-      return { diff, deduct, adjustedDiff, resultSeconds, currentSeconds };
-    }
+  return { deduct, resultSeconds, currentSeconds };
+}
 
     function updateOutput(timeStr, showError = true) {
       errorContainer.innerHTML = '';
@@ -243,24 +238,22 @@
         return;
       }
 
-      const { diff, deduct, adjustedDiff, resultSeconds, currentSeconds } = computeResult(targetSeconds);
+      const { deduct, resultSeconds, currentSeconds } = computeResult(targetSeconds);
 
-      outputTime.textContent = formatSecondsToTime(resultSeconds);
+outputTime.textContent = formatSecondsToTime(resultSeconds);
 
-      // 徽章显示扣减了多久
-      if (deduct > 0) {
-        deltaBadge.textContent = `提前 ${deduct} 秒`;
-      } else if (deduct < 0) {
-        deltaBadge.textContent = `延后 ${Math.abs(deduct)} 秒`;
-      } else {
-        deltaBadge.textContent = '差值不足4秒';
-      }
+// 徽章显示提前了多久
+if (deduct > 0) {
+  deltaBadge.textContent = `提前 ${deduct} 秒`;
+} else {
+  deltaBadge.textContent = '不足4秒';
+}
 
-      // 显示详细过程
-      metaInfo.innerHTML = `
-        <div>当前时间：<span>${formatSecondsToTime(currentSeconds)}</span></div>
-        <div>原始差值：<span>${diff} 秒</span> → 扣减后：<span>${adjustedDiff} 秒</span>（每4秒扣1秒，共扣 ${deduct} 秒）</div>
-      `;
+// 显示详细过程
+metaInfo.innerHTML = `
+  <div>当前时间：<span>${formatSecondsToTime(currentSeconds)}</span></div>
+  <div>成熟时间：<span>${formatSecondsToTime(targetSeconds)}</span> → 提前后：<span>${formatSecondsToTime(resultSeconds)}</span>（每4秒提前1秒，共提前 ${deduct} 秒）</div>
+`;
     }
 
     // 事件绑定
@@ -296,23 +289,17 @@
         return;
       }
       const sec = parseTimeToSeconds(raw);
-      if (sec !== null) {
-        const { deduct, resultSeconds, currentSeconds, diff, adjustedDiff } = computeResult(sec);
-        outputTime.textContent = formatSecondsToTime(resultSeconds);
-        if (deduct > 0) deltaBadge.textContent = `提前 ${deduct} 秒`;
-        else if (deduct < 0) deltaBadge.textContent = `延后 ${Math.abs(deduct)} 秒`;
-        else deltaBadge.textContent = '差值不足4秒';
-        metaInfo.innerHTML = `
-          <div>当前时间：<span>${formatSecondsToTime(currentSeconds)}</span></div>
-          <div>原始差值：<span>${diff} 秒</span> → 扣减后：<span>${adjustedDiff} 秒</span>（共扣 ${deduct} 秒）</div>
-        `;
-        errorContainer.innerHTML = '';
-      } else {
-        outputTime.textContent = '···';
-        deltaBadge.textContent = '待完善';
-        metaInfo.innerHTML = '';
-        errorContainer.innerHTML = '';
-      }
+if (sec !== null) {
+  const { deduct, resultSeconds, currentSeconds } = computeResult(sec);
+  outputTime.textContent = formatSecondsToTime(resultSeconds);
+  if (deduct > 0) deltaBadge.textContent = `提前 ${deduct} 秒`;
+  else deltaBadge.textContent = '不足4秒';
+  metaInfo.innerHTML = `
+    <div>当前时间：<span>${formatSecondsToTime(currentSeconds)}</span></div>
+    <div>成熟时间：<span>${formatSecondsToTime(sec)}</span> → 提前后：<span>${formatSecondsToTime(resultSeconds)}</span>（共提前 ${deduct} 秒）</div>
+  `;
+  errorContainer.innerHTML = '';
+}
     });
 
     // 初始化
