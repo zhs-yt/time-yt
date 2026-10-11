@@ -205,7 +205,6 @@
       return now.getHours() * 3600 + now.getMinutes() * 60 + now.getSeconds();
     }
 
-    // 核心计算
     // 核心计算：对成熟时间本身每4秒提前1秒
 function computeResult(targetSeconds) {
   const currentSeconds = getCurrentSeconds();
