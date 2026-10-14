@@ -108,10 +108,6 @@
       color: #90a3da; font-size: 0.7rem; border: 1px solid #303c56;
     }
   </style>
-
-<link rel="manifest" href="manifest.webmanifest">
-<meta name="theme-color" content="#4f6ef7">
-
 </head>
 <body>
 <div class="card">
@@ -205,26 +201,25 @@
       return now.getHours() * 3600 + now.getMinutes() * 60 + now.getSeconds();
     }
 
-    // 核心计算：对“当前时间→成熟时间”的差值，每4秒提前1秒
-func// 核心计算：对“当前时间→成熟时间”的差值，按比例提前
-// 规则：现实时间流速是理论流速的 1.25 倍（即每4秒提前1秒 => 除以1.25）
-function computeResult(targetSeconds) {
-  const currentSeconds = getCurrentSeconds();
+    // 核心计算：对“当前时间→成熟时间”的差值，按比例提前
+    // 规则：现实时间流速是理论流速的 1.25 倍（即每4秒提前1秒 => 除以1.25）
+    function computeResult(targetSeconds) {
+      const currentSeconds = getCurrentSeconds();
 
-  // 先求出从现在到成熟的差值
-  const diff = targetSeconds - currentSeconds;
+      // 先求出从现在到成熟的差值
+      const diff = targetSeconds - currentSeconds;
 
-  // 调整后的差值 = 原差值 ÷ 1.25
-  const adjustedDiff = Math.round(diff / 1.25);
+      // 调整后的差值 = 原差值 ÷ 1.25
+      const adjustedDiff = Math.round(diff / 1.25);
 
-  // 提前量 = 原差值 - 调整后的差值
-  const deduct = diff - adjustedDiff;
+      // 提前量 = 原差值 - 调整后的差值
+      const deduct = diff - adjustedDiff;
 
-  // 最终时间 = 当前时间 + 调整后的差值
-  const resultSeconds = currentSeconds + adjustedDiff;
+      // 最终时间 = 当前时间 + 调整后的差值
+      const resultSeconds = currentSeconds + adjustedDiff;
 
-  return { diff, deduct, adjustedDiff, resultSeconds, currentSeconds };
-}
+      return { diff, deduct, adjustedDiff, resultSeconds, currentSeconds };
+    }
 
     function updateOutput(timeStr, showError = true) {
       errorContainer.innerHTML = '';
@@ -241,90 +236,6 @@ function computeResult(targetSeconds) {
         outputTime.textContent = '无效时间';
         deltaBadge.textContent = '格式错误';
         if (showError) {
-          errorContainer.innerHTML = '<span class="error-msg">⚠️ 请输入有效时间，如 18:00:00 或 23:59</span>';
+          errorContainer.innerHTML = '<span class="error-msg">请输入有效的 HH:MM 或 HH:MM:SS</span>';
         }
-        return;
-      }
-
-      const { diff, deduct, adjustedDiff, resultSeconds, currentSeconds } = computeResult(targetSeconds);
-
-outputTime.textContent = formatSecondsToTime(resultSeconds);
-
-// 徽章显示提前了多久
-if (deduct > 0) {
-  deltaBadge.textContent = `提前 ${deduct} 秒`;
-} else if (deduct < 0) {
-  deltaBadge.textContent = `延后 ${Math.abs(deduct)} 秒`;
-} else {
-  deltaBadge.textContent = '无需提前';
-}
-
-// 显示详细过程
-metaInfo.innerHTML = `
-  <div>当前时间：<span>${formatSecondsToTime(currentSeconds)}</span></div>
-  <div>原始差值：<span>${diff} 秒</span> → 加速后：<span>${adjustedDiff} 秒</span>（按 1.25 倍流速，共提前 ${deduct} 秒）</div>
-`;
-    }
-
-    // 事件绑定
-    calcBtn.addEventListener('click', () => updateOutput(inputTime.value.trim(), true));
-
-    resetBtn.addEventListener('click', () => {
-      inputTime.value = '18:00:00';
-      updateOutput('18:00:00', false);
-    });
-
-    presetBtns.forEach(btn => {
-      btn.addEventListener('click', function() {
-        inputTime.value = this.getAttribute('data-preset');
-        updateOutput(inputTime.value, true);
-      });
-    });
-
-    inputTime.addEventListener('keydown', e => {
-      if (e.key === 'Enter') {
-        e.preventDefault();
-        calcBtn.click();
-      }
-    });
-
-    // 实时预览（不显示错误）
-    inputTime.addEventListener('input', function() {
-      const raw = this.value.trim();
-      if (raw === '') {
-        outputTime.textContent = '--:--:--';
-        deltaBadge.textContent = '等待输入';
-        metaInfo.innerHTML = '';
-        errorContainer.innerHTML = '';
-        return;
-      }
-      const sec = parseTimeToSeconds(raw);
-if (sec !== null) {
-  const { diff, deduct, adjustedDiff, resultSeconds, currentSeconds } = computeResult(sec);
-  outputTime.textContent = formatSecondsToTime(resultSeconds);
-  if (deduct > 0) deltaBadge.textContent = `提前 ${deduct} 秒`;
-  else if (deduct < 0) deltaBadge.textContent = `延后 ${Math.abs(deduct)} 秒`;
-  else deltaBadge.textContent = '无需提前';
-  metaInfo.innerHTML = `
-    <div>当前时间：<span>${formatSecondsToTime(currentSeconds)}</span></div>
-    <div>原始差值：<span>${diff} 秒</span> → 加速后：<span>${adjustedDiff} 秒</span>（共提前 ${deduct} 秒）</div>
-  `;
-  errorContainer.innerHTML = '';
-}
-    });
-
-    // 初始化
-    updateOutput('18:00:00', false);
-  })();
-</script>
-
-<script>
-  if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.register('./sw.js')
-      .then(() => console.log('Service Worker 注册成功'))
-      .catch((err) => console.log('注册失败:', err));
-  }
-
-</script>
-</body>
-</html>
+  
