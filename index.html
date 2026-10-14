@@ -237,4 +237,29 @@
     updateOutput(inputTime.value.trim());
   });
 
-  rese
+    resetBtn.addEventListener('click', function() {
+    inputTime.value = '18:00:00';
+    outputTime.textContent = '--:--:--';
+    deltaBadge.textContent = '等待计算';
+    metaInfo.innerHTML = '';
+    errorContainer.innerHTML = '';
+  });
+
+  for (let i = 0; i < presetBtns.length; i++) {
+    presetBtns[i].addEventListener('click', function() {
+      inputTime.value = this.dataset.preset;
+      updateOutput(inputTime.value);
+    });
+  }
+
+  inputTime.addEventListener('keydown', function(e) {
+    if (e.key === 'Enter') {
+      updateOutput(inputTime.value.trim());
+    }
+  });
+
+  updateOutput(inputTime.value);
+})();
+</script>
+</body>
+</html>
